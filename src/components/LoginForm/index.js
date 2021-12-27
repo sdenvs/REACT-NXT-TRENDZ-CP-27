@@ -6,6 +6,8 @@ class LoginForm extends Component {
   state = {
     username: '',
     password: '',
+    isError: false,
+    isEmpty: false,
   }
 
   onSubmitSuccess = () => {
@@ -16,17 +18,25 @@ class LoginForm extends Component {
   submitForm = async event => {
     event.preventDefault()
     const {username, password} = this.state
-    const userDetails = {username, password}
-    const url = 'https://apis.ccbp.in/login'
-    const options = {
-      method: 'POST',
-      body: JSON.stringify(userDetails),
-    }
-    const response = await fetch(url, options)
-    const data = await response.json()
-    console.log(data)
-    if (response.ok === true) {
-      this.onSubmitSuccess()
+    if (username === '' || password === '') {
+      this.setState({isEmpty: true})
+    } else {
+      this.setState({isEmpty: false})
+      const userDetails = {username, password}
+      const url = 'https://apis.ccbp.in/login'
+      const options = {
+        method: 'POST',
+        body: JSON.stringify(userDetails),
+      }
+      const response = await fetch(url, options)
+      const data = await response.json()
+      console.log(data)
+      if (response.ok === true) {
+        this.setState({isError: false})
+        this.onSubmitSuccess()
+      } else {
+        this.setState({isError: true})
+      }
     }
   }
 
@@ -47,6 +57,7 @@ class LoginForm extends Component {
         </label>
         <input
           type="password"
+          placeholder="Password"
           id="password"
           className="password-input-filed"
           value={password}
@@ -67,6 +78,7 @@ class LoginForm extends Component {
           type="text"
           id="username"
           className="username-input-filed"
+          placeholder="Username"
           value={username}
           onChange={this.onChangeUsername}
         />
@@ -75,6 +87,7 @@ class LoginForm extends Component {
   }
 
   render() {
+    const {isError, isEmpty} = this.state
     return (
       <div className="login-form-container">
         <img
@@ -95,6 +108,8 @@ class LoginForm extends Component {
           />
           <div className="input-container">{this.renderUsernameField()}</div>
           <div className="input-container">{this.renderPasswordField()}</div>
+          {isError && <p>username and password don't match</p>}
+          {isEmpty && <p>username and password should not be empty</p>}
           <button type="submit" className="login-button">
             Login
           </button>
